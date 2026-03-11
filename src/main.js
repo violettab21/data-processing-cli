@@ -1,6 +1,6 @@
 import * as readline from "node:readline/promises";
 import os from "node:os";
-import { getUpPath } from "./navigation.js";
+import { getUpPath, getCdPath } from "./navigation.js";
 
 let userPath = os.homedir();
 
@@ -19,13 +19,29 @@ const main = async () => {
 
   rl.prompt();
 
-  rl.on("line", (input) => {
-    switch (input) {
+  rl.on("line", async (input) => {
+    const [command, ...args] = input.split(" ");
+    console.log(args);
+    switch (command) {
       case "up": {
         const updatedPath = getUpPath(userPath);
         userPath = updatedPath;
         showCurrentPath(userPath);
         rl.prompt();
+        break;
+      }
+
+      case "cd": {
+        try {
+          const newPath = await getCdPath(userPath, args.join(" "));
+          userPath = newPath;
+        } catch (err) {
+          console.log("Operation failed");
+        } finally {
+          showCurrentPath(userPath);
+          rl.prompt();
+        }
+
         break;
       }
       case ".exit": {
