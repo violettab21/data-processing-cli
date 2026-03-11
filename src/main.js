@@ -1,7 +1,12 @@
 import * as readline from "node:readline/promises";
 import os from "node:os";
+import { getUpPath } from "./navigation.js";
 
 let userPath = os.homedir();
+
+const showCurrentPath = (path) => {
+  console.log(`You are currently in ${path}`);
+};
 
 const main = async () => {
   const rl = readline.createInterface({
@@ -10,12 +15,19 @@ const main = async () => {
     prompt: ">",
   });
   console.log("Welcome to Data Processing CLI!");
-  console.log(`You are currently in ${userPath}`);
+  showCurrentPath(userPath);
 
   rl.prompt();
 
   rl.on("line", (input) => {
     switch (input) {
+      case "up": {
+        const updatedPath = getUpPath(userPath);
+        userPath = updatedPath;
+        showCurrentPath(userPath);
+        rl.prompt();
+        break;
+      }
       case ".exit": {
         rl.close();
         break;

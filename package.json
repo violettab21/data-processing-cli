@@ -9,7 +9,7 @@
   "license": "ISC",
   "author": "",
   "type": "module",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "start": "node src/main.js"
   }
