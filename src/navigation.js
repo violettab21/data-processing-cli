@@ -27,3 +27,41 @@ export const getCdPath = async (currentPath, newPath) => {
     throw err;
   }
 };
+
+export const getListOfFiles = async (currentPath) => {
+  try {
+    const files = await fs.readdir(currentPath);
+    const folderFiles = await Promise.all(
+      files.map(async (el) => {
+        const fileDetails = await fs.stat(path.resolve(currentPath, el));
+        const name = path.basename(el);
+        const type = fileDetails.isDirectory()
+          ? "folder"
+          : fileDetails.isFile()
+            ? "file"
+            : null;
+        return {
+          name,
+          type,
+        };
+      }),
+    );
+    console.log(folderFiles);
+    return folderFiles
+      .filter((el) => el.type !== null)
+      .sort((a, b) => {
+        if (a.type !== b.type) {
+          return b.type.localeCompare(a.type);
+        }
+        return a.name.localeCompare(b.name);
+      });
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const printFileList = (files) => {
+  files.forEach((file) => {
+    console.log(`${file.name} [${file.type}]`);
+  });
+};

@@ -1,6 +1,11 @@
 import * as readline from "node:readline/promises";
 import os from "node:os";
-import { getUpPath, getCdPath } from "./navigation.js";
+import {
+  getUpPath,
+  getCdPath,
+  getListOfFiles,
+  printFileList,
+} from "./navigation.js";
 
 let userPath = os.homedir();
 
@@ -42,6 +47,20 @@ const main = async () => {
           rl.prompt();
         }
 
+        break;
+      }
+
+      case "ls": {
+        try {
+          const content = await getListOfFiles(userPath);
+          printFileList(content);
+        } catch (err) {
+          console.log(err);
+          console.log("Operation failed");
+        } finally {
+          showCurrentPath(userPath);
+          rl.prompt();
+        }
         break;
       }
       case ".exit": {
