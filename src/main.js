@@ -8,6 +8,7 @@ import {
 } from "./navigation.js";
 
 import { csvToJson } from "./commands/csvToJson.js";
+import { getCount, printCount } from "./commands/count.js";
 import { jsonToCsv } from "./commands/jsonToCsv.js";
 import path from "node:path";
 import { resolvePath } from "./utils/pathResolver.js";
@@ -112,7 +113,6 @@ const main = async () => {
           const outputPath = resolvePath(output, userPath);
 
           await csvToJson(inputPath, outputPath);
-          
         } catch (err) {
           console.log(err);
           console.log("Operation failed");
@@ -133,6 +133,24 @@ const main = async () => {
           const outputPath = resolvePath(output, userPath);
 
           await jsonToCsv(inputPath, outputPath);
+        } catch (err) {
+          console.log(err);
+          console.log("Operation failed");
+        } finally {
+          showCurrentPath(userPath);
+          rl.prompt();
+        }
+        break;
+      }
+      case "count": {
+        try {
+          const { input } = parseArguments(args.join(" "), {
+            input: { type: "string" },
+          });
+          const inputPath = resolvePath(input, userPath);
+
+          const countData = await getCount(inputPath);
+          printCount(countData);
         } catch (err) {
           console.log(err);
           console.log("Operation failed");

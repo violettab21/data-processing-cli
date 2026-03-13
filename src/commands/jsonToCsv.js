@@ -37,5 +37,3 @@ export const jsonToCsv = async (input, output) => {
   });
   await pipeline(rs, ts, transformToCSV, ws);
 };
-
-await jsonToCsv(path.resolve("result.json"), path.resolve("result1.csv"));
