@@ -12,6 +12,7 @@ import { getCount, printCount } from "./commands/count.js";
 import { jsonToCsv } from "./commands/jsonToCsv.js";
 import path from "node:path";
 import { resolvePath } from "./utils/pathResolver.js";
+import { hash, printHash } from "./commands/hash.js";
 
 let userPath = os.homedir();
 
@@ -28,19 +29,23 @@ const parseArguments = (args, params) => {
     if (value.type === "string") {
       console.log("heres");
       let regexp = new RegExp(`--${key}\\b(.*?)(?=--\\w+|$)`);
-      let value = args.match(regexp);
+      let found = args.match(regexp);
       console.log(value);
-      if (value && value[1] && value[1].trim()) {
-        values[key] = value[1].trim();
+      if (found && found[1] && found[1].trim()) {
+        values[key] = found[1].trim();
       } else {
-        throw new Error("Invalid arguments");
+        if (value.default) {
+          values[key] = value.default;
+        } else {
+          throw new Error("Invalid arguments");
+        }
       }
     } else if (value.type === "boolean") {
       let regexp = new RegExp(`--${key}\\b(.*?)`);
 
-      let value = args.match(regexp);
-      console.log(value);
-      if (value) {
+      let found = args.match(regexp);
+      console.log(found);
+      if (found) {
         values[key] = true;
       } else {
         values[key] = false;
@@ -151,6 +156,26 @@ const main = async () => {
 
           const countData = await getCount(inputPath);
           printCount(countData);
+        } catch (err) {
+          console.log(err);
+          console.log("Operation failed");
+        } finally {
+          showCurrentPath(userPath);
+          rl.prompt();
+        }
+        break;
+      }
+      case "hash": {
+        try {
+          const { input, algorithm, save } = parseArguments(args.join(" "), {
+            input: { type: "string" },
+            algorithm: { type: "string", default: "sha256" },
+            save: { type: "boolean" },
+          });
+          const inputPath = resolvePath(input, userPath);
+
+          const hashData = await hash(inputPath, algorithm, save);
+          printHash(hashData, algorithm);
         } catch (err) {
           console.log(err);
           console.log("Operation failed");

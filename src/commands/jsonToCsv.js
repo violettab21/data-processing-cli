@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import path from "node:path";
+
 
 export const jsonToCsv = async (input, output) => {
   const rs = fs.createReadStream(input, "utf8");
