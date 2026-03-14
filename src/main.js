@@ -14,6 +14,7 @@ import path from "node:path";
 import { resolvePath } from "./utils/pathResolver.js";
 import { hashFile, printHash } from "./commands/hash.js";
 import { hashCompare } from "./commands/hashCompare.js";
+import { logStats } from "./commands/logStats.js";
 
 let userPath = os.homedir();
 
@@ -197,6 +198,27 @@ const main = async () => {
           const hashPath = resolvePath(hash, userPath);
 
           await hashCompare(inputPath, hashPath, algorithm);
+        } catch (err) {
+          console.log(err);
+          console.log("Operation failed");
+        } finally {
+          showCurrentPath(userPath);
+          rl.prompt();
+        }
+        break;
+      }
+
+      case "log-stats": {
+        try {
+          const { input, output } = parseArguments(args.join(" "), {
+            input: { type: "string" },
+            output: { type: "string" },
+          });
+          const inputPath = resolvePath(input, userPath);
+          const outputPath = resolvePath(output, userPath);
+
+          await logStats(inputPath, outputPath);
+          console.log("Finished");
         } catch (err) {
           console.log(err);
           console.log("Operation failed");
