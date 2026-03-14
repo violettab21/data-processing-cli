@@ -3,7 +3,7 @@ const { createHash } = await import("node:crypto");
 import { pipeline } from "node:stream/promises";
 import path from "node:path";
 
-export const hash = async (input, algorithm, save) => {
+export const hashFile = async (input, algorithm, save) => {
   const rs = fs.createReadStream(input);
   const hash = createHash(algorithm);
 

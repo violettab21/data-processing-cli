@@ -12,7 +12,8 @@ import { getCount, printCount } from "./commands/count.js";
 import { jsonToCsv } from "./commands/jsonToCsv.js";
 import path from "node:path";
 import { resolvePath } from "./utils/pathResolver.js";
-import { hash, printHash } from "./commands/hash.js";
+import { hashFile, printHash } from "./commands/hash.js";
+import { hashCompare } from "./commands/hashCompare.js";
 
 let userPath = os.homedir();
 
@@ -174,8 +175,28 @@ const main = async () => {
           });
           const inputPath = resolvePath(input, userPath);
 
-          const hashData = await hash(inputPath, algorithm, save);
+          const hashData = await hashFile(inputPath, algorithm, save);
           printHash(hashData, algorithm);
+        } catch (err) {
+          console.log(err);
+          console.log("Operation failed");
+        } finally {
+          showCurrentPath(userPath);
+          rl.prompt();
+        }
+        break;
+      }
+      case "hash-compare": {
+        try {
+          const { input, algorithm, hash } = parseArguments(args.join(" "), {
+            input: { type: "string" },
+            algorithm: { type: "string", default: "sha256" },
+            hash: { type: "string" },
+          });
+          const inputPath = resolvePath(input, userPath);
+          const hashPath = resolvePath(hash, userPath);
+
+          await hashCompare(inputPath, hashPath, algorithm);
         } catch (err) {
           console.log(err);
           console.log("Operation failed");
