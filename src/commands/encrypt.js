@@ -1,7 +1,20 @@
 const crypto = await import("node:crypto");
 import fs from "node:fs";
 import { pipeline } from "node:stream/promises";
+import { parseArguments } from "../utils/argsParser.js";
+import { resolvePath } from "./../utils/pathResolver.js";
 
+export async function handleEncryptCommand(args, userPath) {
+  const { input, output, password } = parseArguments(args.join(" "), {
+    input: { type: "string" },
+    output: { type: "string" },
+    password: { type: "string" },
+  });
+  const inputPath = resolvePath(input, userPath);
+  const outputPath = resolvePath(output, userPath);
+
+  await encrypt(inputPath, outputPath, password);
+}
 
 export async function encrypt(input, output, password) {
   const rs = fs.createReadStream(input);
@@ -29,4 +42,3 @@ export async function encrypt(input, output, password) {
   ws.end();
   console.log("Encryption completed");
 }
-

@@ -4,6 +4,20 @@ import { createInterface } from "node:readline";
 import path from "node:path";
 import fs from "node:fs";
 import { getNewSum } from "./../utils/helpers.js";
+import { parseArguments } from "../utils/argsParser.js";
+import { resolvePath } from "./../utils/pathResolver.js";
+
+export const handleLogStatsCommand = async (args, userPath) => {
+  const { input, output } = parseArguments(args.join(" "), {
+    input: { type: "string" },
+    output: { type: "string" },
+  });
+  const inputPath = resolvePath(input, userPath);
+  const outputPath = resolvePath(output, userPath);
+
+  await logStats(inputPath, outputPath);
+  console.log("Finished");
+};
 
 export const logStats = async (input, saveDestination) => {
   const countCpu = os.cpus().length;

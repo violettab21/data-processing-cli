@@ -7,59 +7,17 @@ import {
   printFileList,
 } from "./navigation.js";
 
-import { csvToJson } from "./commands/csvToJson.js";
-import { getCount, printCount } from "./commands/count.js";
-import { jsonToCsv } from "./commands/jsonToCsv.js";
-import path from "node:path";
-import { resolvePath } from "./utils/pathResolver.js";
-import { hashFile, printHash } from "./commands/hash.js";
-import { hashCompare } from "./commands/hashCompare.js";
-import { logStats } from "./commands/logStats.js";
-import { encrypt } from "./commands/encrypt.js";
-import { decrypt } from "./commands/decrypt.js";
+import { handleCsvToJSONCommand } from "./commands/csvToJson.js";
+import { countCommand } from "./commands/count.js";
+import { handleJsonToCsvCommand } from "./commands/jsonToCsv.js";
+import { handleHashCommand } from "./commands/hash.js";
+import { handleHashCompareCommand } from "./commands/hashCompare.js";
+import { handleLogStatsCommand } from "./commands/logStats.js";
+import { handleEncryptCommand } from "./commands/encrypt.js";
+import { handleDecryptCommand } from "./commands/decrypt.js";
+import { showCurrentPath } from "./utils/helpers.js";
 
 let userPath = os.homedir();
-
-const showCurrentPath = (path) => {
-  console.log(`You are currently in ${path}`);
-};
-
-const parseArguments = (args, params) => {
-  const values = {};
-
-  for (let [key, value] of Object.entries(params)) {
-    console.log(key);
-    console.log(value);
-    if (value.type === "string") {
-      console.log("heres");
-      let regexp = new RegExp(`--${key}\\b(.*?)(?=--\\w+|$)`);
-      let found = args.match(regexp);
-      console.log(value);
-      if (found && found[1] && found[1].trim()) {
-        values[key] = found[1].trim();
-      } else {
-        if (value.default) {
-          values[key] = value.default;
-        } else {
-          throw new Error("Invalid arguments");
-        }
-      }
-    } else if (value.type === "boolean") {
-      let regexp = new RegExp(`--${key}\\b(.*?)`);
-
-      let found = args.match(regexp);
-      console.log(found);
-      if (found) {
-        values[key] = true;
-      } else {
-        values[key] = false;
-      }
-    } else {
-      throw new Error("Invalid arguments");
-    }
-  }
-  return values;
-};
 
 const main = async () => {
   const rl = readline.createInterface({
@@ -73,213 +31,7 @@ const main = async () => {
   rl.prompt();
 
   rl.on("line", async (input) => {
-    const [command, ...args] = input.split(" ");
-    console.log(args);
-    switch (command) {
-      case "up": {
-        const updatedPath = getUpPath(userPath);
-        userPath = updatedPath;
-        showCurrentPath(userPath);
-        rl.prompt();
-        break;
-      }
-
-      case "cd": {
-        try {
-          const newPath = await getCdPath(userPath, args.join(" "));
-          userPath = newPath;
-        } catch (err) {
-          console.log("Operation failed");
-        } finally {
-          showCurrentPath(userPath);
-          rl.prompt();
-        }
-
-        break;
-      }
-
-      case "ls": {
-        try {
-          const content = await getListOfFiles(userPath);
-          printFileList(content);
-        } catch (err) {
-          console.log(err);
-          console.log("Operation failed");
-        } finally {
-          showCurrentPath(userPath);
-          rl.prompt();
-        }
-        break;
-      }
-      case "csv-to-json": {
-        try {
-          const { input, output } = parseArguments(args.join(" "), {
-            input: { type: "string" },
-            output: { type: "string" },
-          });
-          const inputPath = resolvePath(input, userPath);
-
-          const outputPath = resolvePath(output, userPath);
-
-          await csvToJson(inputPath, outputPath);
-        } catch (err) {
-          console.log(err);
-          console.log("Operation failed");
-        } finally {
-          showCurrentPath(userPath);
-          rl.prompt();
-        }
-        break;
-      }
-      case "json-to-csv": {
-        try {
-          const { input, output } = parseArguments(args.join(" "), {
-            input: { type: "string" },
-            output: { type: "string" },
-          });
-          const inputPath = resolvePath(input, userPath);
-
-          const outputPath = resolvePath(output, userPath);
-
-          await jsonToCsv(inputPath, outputPath);
-        } catch (err) {
-          console.log(err);
-          console.log("Operation failed");
-        } finally {
-          showCurrentPath(userPath);
-          rl.prompt();
-        }
-        break;
-      }
-      case "count": {
-        try {
-          const { input } = parseArguments(args.join(" "), {
-            input: { type: "string" },
-          });
-          const inputPath = resolvePath(input, userPath);
-
-          const countData = await getCount(inputPath);
-          printCount(countData);
-        } catch (err) {
-          console.log(err);
-          console.log("Operation failed");
-        } finally {
-          showCurrentPath(userPath);
-          rl.prompt();
-        }
-        break;
-      }
-      case "hash": {
-        try {
-          const { input, algorithm, save } = parseArguments(args.join(" "), {
-            input: { type: "string" },
-            algorithm: { type: "string", default: "sha256" },
-            save: { type: "boolean" },
-          });
-          const inputPath = resolvePath(input, userPath);
-
-          const hashData = await hashFile(inputPath, algorithm, save);
-          printHash(hashData, algorithm);
-        } catch (err) {
-          console.log(err);
-          console.log("Operation failed");
-        } finally {
-          showCurrentPath(userPath);
-          rl.prompt();
-        }
-        break;
-      }
-      case "hash-compare": {
-        try {
-          const { input, algorithm, hash } = parseArguments(args.join(" "), {
-            input: { type: "string" },
-            algorithm: { type: "string", default: "sha256" },
-            hash: { type: "string" },
-          });
-          const inputPath = resolvePath(input, userPath);
-          const hashPath = resolvePath(hash, userPath);
-
-          await hashCompare(inputPath, hashPath, algorithm);
-        } catch (err) {
-          console.log(err);
-          console.log("Operation failed");
-        } finally {
-          showCurrentPath(userPath);
-          rl.prompt();
-        }
-        break;
-      }
-
-      case "log-stats": {
-        try {
-          const { input, output } = parseArguments(args.join(" "), {
-            input: { type: "string" },
-            output: { type: "string" },
-          });
-          const inputPath = resolvePath(input, userPath);
-          const outputPath = resolvePath(output, userPath);
-
-          await logStats(inputPath, outputPath);
-          console.log("Finished");
-        } catch (err) {
-          console.log(err);
-          console.log("Operation failed");
-        } finally {
-          showCurrentPath(userPath);
-          rl.prompt();
-        }
-        break;
-      }
-
-      case "encrypt": {
-        try {
-          const { input, output, password } = parseArguments(args.join(" "), {
-            input: { type: "string" },
-            output: { type: "string" },
-            password: { type: "string" },
-          });
-          const inputPath = resolvePath(input, userPath);
-          const outputPath = resolvePath(output, userPath);
-
-          await encrypt(inputPath, outputPath, password);
-        } catch (err) {
-          console.log(err);
-          console.log("Operation failed");
-        } finally {
-          showCurrentPath(userPath);
-          rl.prompt();
-        }
-        break;
-      }
-      case "decrypt": {
-        try {
-          const { input, output, password } = parseArguments(args.join(" "), {
-            input: { type: "string" },
-            output: { type: "string" },
-            password: { type: "string" },
-          });
-          const inputPath = resolvePath(input, userPath);
-          const outputPath = resolvePath(output, userPath);
-
-          await decrypt(inputPath, outputPath, password);
-        } catch (err) {
-          console.log(err);
-          console.log("Operation failed");
-        } finally {
-          showCurrentPath(userPath);
-          rl.prompt();
-        }
-        break;
-      }
-      case ".exit": {
-        rl.close();
-        break;
-      }
-      default: {
-        console.log("Invalid input");
-        rl.prompt();
-      }
-    }
+    handleInput(input, rl);
   });
 
   rl.on("close", () => {
@@ -288,3 +40,106 @@ const main = async () => {
 };
 
 await main();
+
+async function handleInput(input, rl) {
+  const [command, ...args] = input.split(" ");
+
+  switch (command) {
+    case "up": {
+      const updatedPath = getUpPath(userPath);
+      userPath = updatedPath;
+      showCurrentPath(userPath);
+      rl.prompt();
+      break;
+    }
+
+    case "cd": {
+      await commandHandler(async () => {
+        const newPath = await getCdPath(userPath, args.join(" "));
+        userPath = newPath;
+      }, rl);
+      break;
+    }
+
+    case "ls": {
+      await commandHandler(async () => {
+        const content = await getListOfFiles(userPath);
+        printFileList(content);
+      }, rl);
+      break;
+    }
+    case "csv-to-json": {
+      await commandHandler(async () => {
+        await handleCsvToJSONCommand(args, userPath);
+      }, rl);
+      break;
+    }
+    case "json-to-csv": {
+      await commandHandler(async () => {
+        await handleJsonToCsvCommand(args, userPath);
+      }, rl);
+      break;
+    }
+    case "count": {
+      await commandHandler(async () => {
+        await countCommand(args, userPath);
+      }, rl);
+      break;
+    }
+    case "hash": {
+      await commandHandler(async () => {
+        await handleHashCommand(args, userPath);
+      }, rl);
+      break;
+    }
+    case "hash-compare": {
+      await commandHandler(async () => {
+        await handleHashCompareCommand(args, userPath);
+      }, rl);
+      break;
+    }
+
+    case "log-stats": {
+      await commandHandler(async () => {
+        await handleLogStatsCommand(args, userPath);
+      }, rl);
+      break;
+    }
+
+    case "encrypt": {
+      await commandHandler(async () => {
+        await handleEncryptCommand(args, userPath);
+      }, rl);
+      break;
+    }
+    case "decrypt": {
+      await commandHandler(async () => {
+        await handleDecryptCommand(args, userPath);
+      }, rl);
+      break;
+    }
+    case ".exit": {
+      rl.close();
+      break;
+    }
+    default: {
+      console.log("Invalid input");
+      rl.prompt();
+    }
+  }
+}
+
+async function commandHandler(callback, rl) {
+  try {
+    await callback();
+  } catch (err) {
+    if (err.message === "Invalid arguments") {
+      console.log("Invalid arguments");
+    } else {
+      console.log("Operation Failed");
+    }
+  } finally {
+    showCurrentPath(userPath);
+    rl.prompt();
+  }
+}

@@ -3,6 +3,20 @@ import fs from "node:fs";
 import fsPromise from "node:fs/promises";
 import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
+import { parseArguments } from "../utils/argsParser.js";
+import { resolvePath } from "./../utils/pathResolver.js";
+
+export async function handleDecryptCommand(args, userPath) {
+  const { input, output, password } = parseArguments(args.join(" "), {
+    input: { type: "string" },
+    output: { type: "string" },
+    password: { type: "string" },
+  });
+  const inputPath = resolvePath(input, userPath);
+  const outputPath = resolvePath(output, userPath);
+
+  await decrypt(inputPath, outputPath, password);
+}
 
 export async function decrypt(input, output, password) {
   const fileStats = await fsPromise.stat(input);

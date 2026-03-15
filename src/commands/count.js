@@ -1,5 +1,17 @@
 import fs from "node:fs";
 import { createInterface } from "node:readline";
+import { parseArguments } from "../utils/argsParser.js";
+import { resolvePath } from "./../utils/pathResolver.js";
+
+export const countCommand = async (args, userPath) => {
+  const { input } = parseArguments(args.join(" "), {
+    input: { type: "string" },
+  });
+  const inputPath = resolvePath(input, userPath);
+
+  const countData = await getCount(inputPath);
+  printCount(countData);
+};
 
 export const getCount = async (input) => {
   let lines = 0;
@@ -8,6 +20,7 @@ export const getCount = async (input) => {
 
   await new Promise((resolve, reject) => {
     const rs = fs.createReadStream(input);
+    rs.on("error", reject);
     const reg = /\S+/g;
     const rl = createInterface({
       input: rs,
@@ -29,8 +42,8 @@ export const getCount = async (input) => {
     rl.on("close", () => {
       resolve();
     });
+    rl.on("error", reject);
   });
-
   return {
     lines,
     words,
@@ -40,7 +53,7 @@ export const getCount = async (input) => {
 
 export const printCount = (countData) => {
   const { lines, words, characters } = countData;
-  console.log(`Word Count:\n`);
+  console.log(`Word Count:`);
   console.log(`Lines: ${lines}`);
   console.log(`Words: ${words}`);
   console.log(`Characters: ${characters}`);

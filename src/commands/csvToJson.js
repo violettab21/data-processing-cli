@@ -1,6 +1,20 @@
 import fs from "node:fs";
 import { Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
+import { parseArguments } from "../utils/argsParser.js";
+import { resolvePath } from "./../utils/pathResolver.js";
+
+export const handleCsvToJSONCommand = async (args, userPath) => {
+  const { input, output } = parseArguments(args.join(" "), {
+    input: { type: "string" },
+    output: { type: "string" },
+  });
+  const inputPath = resolvePath(input, userPath);
+
+  const outputPath = resolvePath(output, userPath);
+
+  await csvToJson(inputPath, outputPath);
+};
 
 export const csvToJson = async (input, output) => {
   const rs = fs.createReadStream(input);
@@ -10,7 +24,6 @@ export const csvToJson = async (input, output) => {
   let isFirstObject = true;
   const ts = new Transform({
     transform(chunk, encoding, callback) {
-      console.log(chunk);
       const chunkLines = chunk.toString().split("\n");
       let chunkData;
       if (linesStorage.length === 0) {
@@ -22,8 +35,7 @@ export const csvToJson = async (input, output) => {
       } else {
         chunkData = chunkLines.slice(0);
       }
-      console.log(chunkData);
-      console.log(headers);
+
       chunkData.map((el) => el.trim());
       chunkData.forEach((el) => {
         if (!isFirstObject) {
@@ -38,6 +50,8 @@ export const csvToJson = async (input, output) => {
                 [headers[i]]: column.trim(),
               };
             }, {}),
+            null,
+            2,
           ),
         );
         isFirstObject = false;
@@ -51,4 +65,5 @@ export const csvToJson = async (input, output) => {
     },
   });
   await pipeline(rs, ts, ws);
+  console.log("Transformation completed");
 };

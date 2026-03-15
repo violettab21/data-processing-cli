@@ -46,7 +46,7 @@ export const getListOfFiles = async (currentPath) => {
         };
       }),
     );
-    console.log(folderFiles);
+
     return folderFiles
       .filter((el) => el.type !== null)
       .sort((a, b) => {
