@@ -1,0 +1,17 @@
+{
+  "name": "data-processing-cli",
+  "version": "1.0.0",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "pers:violettab21/data-processing-cli.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "start": "node src/main.js",
+    "generate-log": "node scripts/logGenerator/generate-logs.js --output workspace/logs.txt --lines 500000"
+  }
+}
