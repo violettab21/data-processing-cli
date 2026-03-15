@@ -15,6 +15,8 @@ import { resolvePath } from "./utils/pathResolver.js";
 import { hashFile, printHash } from "./commands/hash.js";
 import { hashCompare } from "./commands/hashCompare.js";
 import { logStats } from "./commands/logStats.js";
+import { encrypt } from "./commands/encrypt.js";
+import { decrypt } from "./commands/decrypt.js";
 
 let userPath = os.homedir();
 
@@ -219,6 +221,47 @@ const main = async () => {
 
           await logStats(inputPath, outputPath);
           console.log("Finished");
+        } catch (err) {
+          console.log(err);
+          console.log("Operation failed");
+        } finally {
+          showCurrentPath(userPath);
+          rl.prompt();
+        }
+        break;
+      }
+
+      case "encrypt": {
+        try {
+          const { input, output, password } = parseArguments(args.join(" "), {
+            input: { type: "string" },
+            output: { type: "string" },
+            password: { type: "string" },
+          });
+          const inputPath = resolvePath(input, userPath);
+          const outputPath = resolvePath(output, userPath);
+
+          await encrypt(inputPath, outputPath, password);
+        } catch (err) {
+          console.log(err);
+          console.log("Operation failed");
+        } finally {
+          showCurrentPath(userPath);
+          rl.prompt();
+        }
+        break;
+      }
+      case "decrypt": {
+        try {
+          const { input, output, password } = parseArguments(args.join(" "), {
+            input: { type: "string" },
+            output: { type: "string" },
+            password: { type: "string" },
+          });
+          const inputPath = resolvePath(input, userPath);
+          const outputPath = resolvePath(output, userPath);
+
+          await decrypt(inputPath, outputPath, password);
         } catch (err) {
           console.log(err);
           console.log("Operation failed");
