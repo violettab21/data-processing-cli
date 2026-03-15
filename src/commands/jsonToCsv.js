@@ -51,4 +51,5 @@ export const jsonToCsv = async (input, output) => {
   });
   await pipeline(rs, ts, transformToCSV, ws);
   console.log("Transformation completed");
+  console.log(`Result file path ${output}`);
 };

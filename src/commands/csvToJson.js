@@ -66,4 +66,5 @@ export const csvToJson = async (input, output) => {
   });
   await pipeline(rs, ts, ws);
   console.log("Transformation completed");
+  console.log(`Result file path ${output}`);
 };

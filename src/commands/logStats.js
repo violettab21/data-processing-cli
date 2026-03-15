@@ -7,6 +7,8 @@ import { getNewSum } from "./../utils/helpers.js";
 import { parseArguments } from "../utils/argsParser.js";
 import { resolvePath } from "./../utils/pathResolver.js";
 
+//Log can be re-generated via generate-log script
+
 export const handleLogStatsCommand = async (args, userPath) => {
   const { input, output } = parseArguments(args.join(" "), {
     input: { type: "string" },
@@ -16,7 +18,6 @@ export const handleLogStatsCommand = async (args, userPath) => {
   const outputPath = resolvePath(output, userPath);
 
   await logStats(inputPath, outputPath);
-  console.log("Finished");
 };
 
 export const logStats = async (input, saveDestination) => {
@@ -45,11 +46,12 @@ export const logStats = async (input, saveDestination) => {
     );
   }
   const results = await Promise.all(workers);
-  console.log(mergeAggregations(results));
+
   await writeFile(
     saveDestination,
     JSON.stringify(mergeAggregations(results), null, 2),
   );
+  console.log(`Result file path ${saveDestination}`);
 };
 
 function mergeAggregations(aggregations) {

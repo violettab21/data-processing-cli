@@ -41,4 +41,5 @@ export async function encrypt(input, output, password) {
   ws.write(cipher.getAuthTag());
   ws.end();
   console.log("Encryption completed");
+  console.log(`Result file path ${output}`);
 }

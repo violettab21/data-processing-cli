@@ -16,7 +16,7 @@ export const parseArguments = (args, params) => {
         if (value.default) {
           values[key] = value.default;
         } else {
-          throw new Error("Invalid arguments");
+          throw new Error("Invalid input");
         }
       }
     } else if (value.type === "boolean") {
@@ -30,7 +30,7 @@ export const parseArguments = (args, params) => {
         values[key] = false;
       }
     } else {
-      throw new Error("Invalid arguments");
+      throw new Error("Invalid input");
     }
   }
   return values;

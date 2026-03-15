@@ -55,7 +55,13 @@ async function handleInput(input, rl) {
 
     case "cd": {
       await commandHandler(async () => {
-        const newPath = await getCdPath(userPath, args.join(" "));
+        const param = args.join(" ").trim();
+        let cdPath =
+          param.startsWith('"') && param.trim().endsWith('"')
+            ? param.slice(1, param.length - 1)
+            : param;
+
+        const newPath = await getCdPath(userPath, cdPath);
         userPath = newPath;
       }, rl);
       break;
@@ -133,10 +139,11 @@ async function commandHandler(callback, rl) {
   try {
     await callback();
   } catch (err) {
-    if (err.message === "Invalid arguments") {
-      console.log("Invalid arguments");
+    if (err.message === "Invalid input") {
+      console.log("Invalid input");
     } else {
       console.log("Operation Failed");
+      console.log("Error details:", err.message);
     }
   } finally {
     showCurrentPath(userPath);

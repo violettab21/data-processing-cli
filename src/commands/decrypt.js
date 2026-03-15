@@ -63,6 +63,7 @@ export async function decrypt(input, output, password) {
     rs.on("end", () => {
       resolve();
     });
+    rs.on("error", reject);
   });
 
   const ws = fs.createWriteStream(output);
@@ -82,4 +83,5 @@ export async function decrypt(input, output, password) {
 
   await pipeline(readFileContent, decipher, ws);
   console.log("Decryption completed");
+  console.log(`Result file path ${output}`);
 }

@@ -20,7 +20,7 @@ export const getCdPath = async (currentPath, newPath) => {
     const resource = await fs.stat(preparedPath, { throwIfNoEntry: true });
 
     if (!resource.isDirectory()) {
-      throw new Error("Operation failed");
+      throw new Error("Path is not a directory");
     }
     return preparedPath;
   } catch (err) {

@@ -4,12 +4,19 @@ import { pipeline } from "node:stream/promises";
 import { parseArguments } from "../utils/argsParser.js";
 import { resolvePath } from "./../utils/pathResolver.js";
 
+// It's assumed that file to compare with will store hash in format from hash task
+// sha256: 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
+// For cross check use files created from task "hash"
+
 export const handleHashCompareCommand = async (args, userPath) => {
   const { input, algorithm, hash } = parseArguments(args.join(" "), {
     input: { type: "string" },
     algorithm: { type: "string", default: "sha256" },
     hash: { type: "string" },
   });
+  if (algorithm !== "sha256" && algorithm !== "md5" && algorithm !== "sha512") {
+    throw new Error("Unsupported algorithm");
+  }
   const inputPath = resolvePath(input, userPath);
   const hashPath = resolvePath(hash, userPath);
 
